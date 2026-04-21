@@ -1,0 +1,297 @@
+package transformations
+
+import (
+	"strings"
+)
+
+func Articles(text string) string {
+	word := strings.Fields(text)
+
+	for i := 0; i < len(word); i++ {
+		if i+1 < len(word) && len(word[i+1]) > 0 {
+			isVowel := strings.ContainsRune("aeiouhAEIOUH", rune(word[i+1][0]))
+			if word[i] == "a" && isVowel {
+				word[i] = "an"
+			} else if word[i] == "A" && isVowel {
+				word[i] = "An"
+			} else if word[i] == "an" && !isVowel {
+				word[i] = "a"
+			} else if word[i] == "An" && !isVowel {
+				word[i] = "A"
+			}
+		}
+	}
+	return strings.Join(word, " ")
+}
+
+
+
+
+
+package transformations
+
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+)
+
+func Bin(text string) string {
+	fields := strings.Fields(text)
+
+	for i := 0; i < len(fields); i++ {
+		if fields[i] == "(bin)" && i > 0 {
+			decimal, err := strconv.ParseInt(fields[i-1], 2, 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fields[i-1] = fmt.Sprint(decimal)
+
+			fields = append(fields[:i], fields[i+1:]...)
+			i--
+		}
+	}
+	return strings.Join(fields, " ")
+}
+
+
+
+
+
+package transformations
+
+import (
+	"strings"
+)
+
+func Cap(s string) string {
+	words := strings.Fields(s)
+	for i := 0; i < len(words); i++ {
+		if words[i] == "(cap)" && i > 0 {
+			words[i-1] = strings.ToUpper(words[i-1][:1]) + strings.ToLower(words[i-1][1:])
+				words = append(words[:i], words[i+1:]...)
+
+		}
+	}
+	return strings.Join(words, " ")
+}
+
+
+
+
+package transformations
+
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+)
+
+func Hex(text string) string {
+	fields := strings.Fields(text)
+
+	for i := 0; i < len(fields); i++ {
+		if fields[i] == "(hex)" && i > 0 {
+			decimal, err := strconv.ParseInt(fields[i-1], 16, 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fields[i-1] = fmt.Sprint(decimal)
+
+			fields = append(fields[:i], fields[i+1:]...)
+			i-- 
+		}
+	}
+	return strings.Join(fields, " ")
+}
+
+
+
+
+package transformations
+
+import (
+	"strings"
+)
+
+func Low(s string) string {
+	words := strings.Fields(s)
+
+	for i := 0; i < len(words); i++ {
+		if words[i] == "(low)" && i > 0 {
+			words[i-1] = strings.ToLower(words[i-1])
+			words = append(words[:i], words[i+1:]...)
+			i-- 
+		}
+	}
+
+	return strings.Join(words, " ")
+}
+
+
+
+package transformations
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func Nword(s string) string {
+	word := strings.Fields(s)
+
+	for i := 0; i < len(word); i++ {
+		if (word[i] == "(up," || word[i] == "(low," || word[i] == "(cap,") && i+1 < len(word) {
+
+			word[i+1] = strings.TrimSuffix(word[i+1], ")")
+			n, err := strconv.Atoi(word[i+1])
+			if err != nil {
+				fmt.Println("Error converting")
+				return ""
+			}
+
+			start := i - n
+			if start < 0 {
+				start = 0
+			}
+
+			for j := start; j < i; j++ {
+				if word[i] == "(up," {
+					word[j] = strings.ToUpper(word[j])
+				}
+				if word[i] == "(low," {
+					word[j] = strings.ToLower(word[j])
+				}
+				if word[i] == "(cap," {
+					if len(word[j]) > 0 {
+						word[j] = strings.ToUpper(string(word[j][0])) + strings.ToLower(word[j][1:])
+					}
+				}
+			}
+			word = append(word[:i], word[i+2:]...)
+			i--
+		}
+	}
+	return strings.Join(word, " ")
+}
+
+
+
+
+package transformations
+
+import (
+	"regexp"
+)
+
+func Punct(word string) string {
+
+	re1 := regexp.MustCompile(`\s+([.,!?:;]+)`)
+	word = re1.ReplaceAllString(word, "$1")
+
+	re2 := regexp.MustCompile(`([.,!?:;]+)(\s*)(\w)`)
+	word = re2.ReplaceAllString(word, "$1 $3")
+
+	return word
+}
+
+
+
+package transformations
+
+import (
+	"regexp"
+	"strings"
+)
+
+func Quote(s string) string {
+	re := regexp.MustCompile(`'\s*(.*?)\s*'`)
+	s = re.ReplaceAllString(s, " '$1' ")
+
+	re2 := regexp.MustCompile(`"\s*(.*?)\s*"`)
+	s = re2.ReplaceAllString(s, " \"$1\" ")
+
+	//s = re2.ReplaceAllString(s, `"1$"`)
+	//re3 := regexp.MustCompile(`(\w+)(\s+)`)
+	//s = re3.ReplaceAllString(s, `$1 `)
+
+	text := strings.Fields(s)
+	return strings.Join(text, " ")
+}
+
+
+package transformations
+
+import (
+	"strings"
+)
+
+func Up(s string) string {
+	words := strings.Fields(s)
+
+	for i := 0; i < len(words); i++ {
+		if words[i] == "(up)" && i > 0 {
+			words[i-1] = strings.ToUpper(words[i-1])
+			words = append(words[:i], words[i+1:]...)
+			i-- 
+		}
+	}
+
+	return strings.Join(words, " ")
+}
+
+
+
+
+package main
+
+import (
+	"fmt"
+	"goreloaded/transformations"
+	"log"
+	"os"
+)
+
+func main() {
+	if len(os.Args) < 3 {
+		log.Fatal("Usage: go run . input.txt output.txt")
+	}
+	inputFile := os.Args[1]
+	outputFile := os.Args[2]
+
+	data, err := os.ReadFile(inputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	output := Process(string(data))
+
+	
+
+	os.WriteFile(outputFile, []byte(output), 0644)
+	fmt.Println("Modification succesful")
+}
+
+func Process(text string) string {
+	result := transformations.Hex(string(text))
+	result = transformations.Bin(string(result))
+	result = transformations.Nword(string(result))
+	result = transformations.Up(string(result))
+	result = transformations.Low(string(result))
+	result = transformations.Cap(string(result))
+	result = transformations.Articles(string(result))
+	result = transformations.Quote(string(result))
+	result = transformations.Punct(string(result))
+
+	return result
+}
+
+
+
+
+
+
+
